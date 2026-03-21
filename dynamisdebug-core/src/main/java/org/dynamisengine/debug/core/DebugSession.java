@@ -4,6 +4,8 @@ import org.dynamisengine.debug.api.*;
 import org.dynamisengine.debug.api.event.DebugEvent;
 import org.dynamisengine.debug.api.event.DebugEventSink;
 
+import org.dynamisengine.debug.api.DebugQueryService;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,6 +23,8 @@ public final class DebugSession implements DebugEventSink {
     private final DefaultCommandRegistry commandRegistry = new DefaultCommandRegistry();
     private final DebugEventBuffer eventBuffer;
     private final DebugHistory history;
+    private final DefaultDebugQueryService queryService;
+    private final DebugTimeline timeline;
     private volatile boolean enabled = true;
 
     public DebugSession() {
@@ -30,6 +34,8 @@ public final class DebugSession implements DebugEventSink {
     public DebugSession(int maxEvents, int maxHistoryFrames) {
         this.eventBuffer = new DebugEventBuffer(maxEvents);
         this.history = new DebugHistory(maxHistoryFrames);
+        this.queryService = new DefaultDebugQueryService(history, eventBuffer);
+        this.timeline = new DebugTimeline(history);
     }
 
     // --- Providers ---
@@ -115,9 +121,13 @@ public final class DebugSession implements DebugEventSink {
 
     public DebugCommandRegistry commands() { return commandRegistry; }
 
-    // --- History ---
+    // --- History & queries ---
 
     public DebugHistory history() { return history; }
+
+    public DebugQueryService queries() { return queryService; }
+
+    public DebugTimeline timeline() { return timeline; }
 
     // --- Enable/disable ---
 
