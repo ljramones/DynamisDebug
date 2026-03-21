@@ -53,6 +53,18 @@ public final class DebugSession implements DebugEventSink {
     /** Capture snapshots from all providers and store in history. */
     public Map<String, DebugSnapshot> captureFrame(long frameNumber) {
         if (!enabled) return Map.of();
+        Map<String, DebugSnapshot> frame = captureProviders(frameNumber);
+        history.record(frameNumber, frame);
+        return frame;
+    }
+
+    /**
+     * Capture snapshots from all providers without recording to history.
+     * Used by DebugBridge to merge provider and adapter snapshots before
+     * recording a single combined frame.
+     */
+    public Map<String, DebugSnapshot> captureProviders(long frameNumber) {
+        if (!enabled) return new LinkedHashMap<>();
         Map<String, DebugSnapshot> frame = new LinkedHashMap<>();
         for (var entry : providers.entrySet()) {
             try {
@@ -61,7 +73,6 @@ public final class DebugSession implements DebugEventSink {
                 // Don't let debug failure crash the engine
             }
         }
-        history.record(frameNumber, frame);
         return frame;
     }
 
