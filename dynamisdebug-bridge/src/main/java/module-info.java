@@ -39,4 +39,5 @@ module org.dynamisengine.debug.bridge {
     exports org.dynamisengine.debug.bridge;
     exports org.dynamisengine.debug.bridge.event;
     exports org.dynamisengine.debug.bridge.adapter;
+    exports org.dynamisengine.debug.bridge.overlay;
 }
