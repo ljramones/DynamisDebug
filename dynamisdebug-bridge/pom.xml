@@ -89,6 +89,22 @@
       <artifactId>dynamissky-api</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
+    <!-- Layer 5 subsystem dependencies (read-only telemetry consumption) -->
+    <dependency>
+      <groupId>org.dynamisengine.physics</groupId>
+      <artifactId>dynamisphysics-api</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.ai</groupId>
+      <artifactId>dynamis-ai-core</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.scripting</groupId>
+      <artifactId>dynamis-scripting-runtime</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

@@ -22,6 +22,11 @@ module org.dynamisengine.debug.bridge {
     requires org.dynamisengine.vfx.api;
     requires org.dynamisengine.sky.api;
 
+    // Layer 5 subsystem telemetry sources
+    requires org.dynamisengine.physics.api;
+    requires org.dynamisengine.ai.core;
+    requires org.dynamisengine.scripting.runtime;
+
     exports org.dynamisengine.debug.bridge;
     exports org.dynamisengine.debug.bridge.event;
     exports org.dynamisengine.debug.bridge.adapter;
