@@ -63,6 +63,32 @@
       <artifactId>content-api</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
+    <!-- Layer 4 subsystem dependencies (read-only telemetry consumption) -->
+    <dependency>
+      <groupId>org.dynamisengine.audio</groupId>
+      <artifactId>dynamis-audio-dsp</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.light</groupId>
+      <artifactId>engine-api</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.terrain</groupId>
+      <artifactId>dynamisterrain-api</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.vfx</groupId>
+      <artifactId>dynamisvfx-api</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.sky</groupId>
+      <artifactId>dynamissky-api</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
