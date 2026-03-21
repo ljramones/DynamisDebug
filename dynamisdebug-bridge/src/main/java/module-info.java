@@ -1,6 +1,7 @@
 module org.dynamisengine.debug.bridge {
     requires org.dynamisengine.debug.api;
     requires org.dynamisengine.debug.core;
+    requires org.dynamisengine.debug.draw;
     requires org.dynamisengine.core;
     requires dynamis.event;
 
@@ -40,4 +41,5 @@ module org.dynamisengine.debug.bridge {
     exports org.dynamisengine.debug.bridge.event;
     exports org.dynamisengine.debug.bridge.adapter;
     exports org.dynamisengine.debug.bridge.overlay;
+    exports org.dynamisengine.debug.bridge.draw;
 }

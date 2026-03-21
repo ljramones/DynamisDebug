@@ -8,18 +8,19 @@ public record DebugTextCommand(
         float x, float y, float z,
         float r, float g, float b,
         boolean screenSpace,
-        float durationSeconds
+        float durationSeconds,
+        DepthMode depthMode
 ) implements DebugDrawCommand {
 
     /** Screen-space text (x,y in pixels). */
     public static DebugTextCommand screen(String text, float x, float y,
                                            float r, float g, float b) {
-        return new DebugTextCommand(text, x, y, 0, r, g, b, true, 0);
+        return new DebugTextCommand(text, x, y, 0, r, g, b, true, 0, DepthMode.ALWAYS_VISIBLE);
     }
 
     /** World-space text. */
     public static DebugTextCommand world(String text, float x, float y, float z,
                                           float r, float g, float b) {
-        return new DebugTextCommand(text, x, y, z, r, g, b, false, 0);
+        return new DebugTextCommand(text, x, y, z, r, g, b, false, 0, DepthMode.TESTED);
     }
 }

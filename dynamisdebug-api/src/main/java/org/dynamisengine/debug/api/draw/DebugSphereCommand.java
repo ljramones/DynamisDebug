@@ -7,11 +7,18 @@ public record DebugSphereCommand(
         float cx, float cy, float cz,
         float radius,
         float r, float g, float b,
-        float durationSeconds
+        float durationSeconds,
+        DepthMode depthMode
 ) implements DebugDrawCommand {
 
     public static DebugSphereCommand of(float cx, float cy, float cz, float radius,
                                          float r, float g, float b) {
-        return new DebugSphereCommand(cx, cy, cz, radius, r, g, b, 0);
+        return new DebugSphereCommand(cx, cy, cz, radius, r, g, b, 0, DepthMode.TESTED);
+    }
+
+    public static DebugSphereCommand of(float cx, float cy, float cz, float radius,
+                                         float r, float g, float b,
+                                         DepthMode depthMode) {
+        return new DebugSphereCommand(cx, cy, cz, radius, r, g, b, 0, depthMode);
     }
 }

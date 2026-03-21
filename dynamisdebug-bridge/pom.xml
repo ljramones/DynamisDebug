@@ -18,6 +18,11 @@
     </dependency>
     <dependency>
       <groupId>org.dynamisengine.debug</groupId>
+      <artifactId>dynamisdebug-draw</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.debug</groupId>
       <artifactId>dynamisdebug-core</artifactId>
       <version>${project.version}</version>
     </dependency>
