@@ -126,6 +126,12 @@
       <artifactId>localization-api</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
+    <!-- Layer 7 orchestration (read-only telemetry consumption) -->
+    <dependency>
+      <groupId>org.dynamisengine.worldengine</groupId>
+      <artifactId>world-api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

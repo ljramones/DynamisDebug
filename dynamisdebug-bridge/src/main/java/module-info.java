@@ -33,6 +33,9 @@ module org.dynamisengine.debug.bridge {
     requires org.dynamisengine.ui.debug;
     requires org.dynamisengine.localization.api;
 
+    // Layer 7 orchestration
+    requires org.dynamisengine.worldengine.api;
+
     exports org.dynamisengine.debug.bridge;
     exports org.dynamisengine.debug.bridge.event;
     exports org.dynamisengine.debug.bridge.adapter;
