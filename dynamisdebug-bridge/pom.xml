@@ -105,6 +105,27 @@
       <artifactId>dynamis-scripting-runtime</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
+    <!-- Layer 6 subsystem dependencies (read-only telemetry consumption) -->
+    <dependency>
+      <groupId>org.dynamisengine.input</groupId>
+      <artifactId>input-core</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.window</groupId>
+      <artifactId>window-api</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.ui</groupId>
+      <artifactId>ui-debug</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisengine.localization</groupId>
+      <artifactId>localization-api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

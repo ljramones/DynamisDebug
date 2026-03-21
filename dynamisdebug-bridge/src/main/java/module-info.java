@@ -27,6 +27,12 @@ module org.dynamisengine.debug.bridge {
     requires org.dynamisengine.ai.core;
     requires org.dynamisengine.scripting.runtime;
 
+    // Layer 6 subsystem telemetry sources
+    requires org.dynamisengine.input.core;
+    requires org.dynamisengine.window.api;
+    requires org.dynamisengine.ui.debug;
+    requires org.dynamisengine.localization.api;
+
     exports org.dynamisengine.debug.bridge;
     exports org.dynamisengine.debug.bridge.event;
     exports org.dynamisengine.debug.bridge.adapter;
