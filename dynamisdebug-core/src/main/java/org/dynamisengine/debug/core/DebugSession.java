@@ -25,6 +25,7 @@ public final class DebugSession implements DebugEventSink {
     private final DebugHistory history;
     private final DefaultDebugQueryService queryService;
     private final DebugTimeline timeline;
+    private final DebugWatchdog watchdog;
     private volatile boolean enabled = true;
 
     public DebugSession() {
@@ -36,6 +37,7 @@ public final class DebugSession implements DebugEventSink {
         this.history = new DebugHistory(maxHistoryFrames);
         this.queryService = new DefaultDebugQueryService(history, eventBuffer);
         this.timeline = new DebugTimeline(history);
+        this.watchdog = new DebugWatchdog(this);
     }
 
     // --- Providers ---
@@ -139,6 +141,8 @@ public final class DebugSession implements DebugEventSink {
     public DebugQueryService queries() { return queryService; }
 
     public DebugTimeline timeline() { return timeline; }
+
+    public DebugWatchdog watchdog() { return watchdog; }
 
     // --- Enable/disable ---
 

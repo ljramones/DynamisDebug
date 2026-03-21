@@ -6,7 +6,9 @@ import org.dynamisengine.collision.debug.CollisionDebugSnapshot3D;
 import org.dynamisengine.collision.pipeline.CollisionPair;
 import org.dynamisengine.debug.api.DebugCategory;
 import org.dynamisengine.debug.api.DebugQuery;
+import org.dynamisengine.debug.api.DebugSeverity;
 import org.dynamisengine.debug.api.DebugSnapshot;
+import org.dynamisengine.debug.api.WatchdogRule;
 import org.dynamisengine.debug.bridge.adapter.*;
 import org.dynamisengine.debug.core.DebugSession;
 import org.dynamisengine.debug.core.DebugTimeline;
@@ -215,6 +217,76 @@ class FullPipelineIntegrationTest {
             assertFalse(entry.getValue().text().isEmpty(),
                     entry.getKey() + " text should not be empty");
         }
+    }
+
+    // --- Watchdog integration ---
+
+    @Test
+    void watchdogFiresOnThresholdBreach() {
+        session.watchdog().addRule(WatchdogRule.above(
+                "collision.contactSpike", "collision", "contactCount",
+                50.0, DebugSeverity.WARNING, "Contact count spike"));
+
+        // Submit telemetry with high contact count
+        bridge.submitTelemetry("collision",
+                new CollisionDebugSnapshot3D<>(List.of(), List.of()));
+        bridge.submitTelemetry("ecs",
+                new EcsTelemetryAdapter.EcsTelemetrySnapshot(200, 0, 0, 1));
+
+        bridge.captureFrame(1);
+
+        // Contact count is 0, so rule should NOT fire
+        var events = session.drainEvents();
+        assertTrue(events.isEmpty());
+    }
+
+    @Test
+    void watchdogDetectsCrossSubsystemCorrelation() {
+        // Rule: GPU backlog spikes when ECS churn is high
+        session.watchdog().addRule(WatchdogRule.above(
+                "ecs.massDestroy", "ecs", "destroyedCount",
+                50.0, DebugSeverity.WARNING, "Mass entity destruction"));
+        session.watchdog().addRule(WatchdogRule.above(
+                "gpu.backlogSpike", "gpu", "backlogDepth",
+                3.0, DebugSeverity.WARNING, "GPU backlog under pressure"));
+
+        // Simulate a spike frame: ECS churn + GPU backlog
+        bridge.registerAdapter(new GpuTelemetryAdapter());
+        bridge.registerAdapter(new EcsTelemetryAdapter());
+
+        bridge.submitTelemetry("gpu",
+                GpuTelemetryAdapter.GpuTelemetrySnapshot.of(
+                        new UploadTelemetry(2, 5, 8192, 4, 16384, 5, 100, 102400, 0.5, 2.0, 8.0, 1.5)));
+        bridge.submitTelemetry("ecs",
+                new EcsTelemetryAdapter.EcsTelemetrySnapshot(500, 0, 100, 42));
+
+        bridge.captureFrame(1);
+
+        // Both rules should fire — this is the cross-subsystem correlation
+        var events = session.drainEvents();
+        assertEquals(2, events.size());
+
+        var names = events.stream().map(e -> e.name()).toList();
+        assertTrue(names.contains("ecs.massDestroy"));
+        assertTrue(names.contains("gpu.backlogSpike"));
+    }
+
+    @Test
+    void watchdogEventsAppearInEventQueries() {
+        session.watchdog().addRule(WatchdogRule.above(
+                "ecs.churn", "ecs", "destroyedCount",
+                10.0, DebugSeverity.ERROR, "High entity churn"));
+
+        bridge.registerAdapter(new EcsTelemetryAdapter());
+        bridge.submitTelemetry("ecs",
+                new EcsTelemetryAdapter.EcsTelemetrySnapshot(100, 0, 50, 1));
+        bridge.captureFrame(1);
+
+        var events = session.queries().queryEvents(
+                DebugQuery.builder().severities(DebugSeverity.ERROR).build()
+        );
+        assertEquals(1, events.size());
+        assertEquals("ecs.churn", events.get(0).name());
     }
 
     // --- Telemetry submission helpers ---

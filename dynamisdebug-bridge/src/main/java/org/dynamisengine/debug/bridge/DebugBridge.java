@@ -105,6 +105,9 @@ public final class DebugBridge {
         // 3. Record the merged frame in history (single write)
         session.history().record(frameNumber, frame);
 
+        // 4. Evaluate watchdog rules against the merged frame
+        session.watchdog().evaluate(frameNumber, frame);
+
         return frame;
     }
 
