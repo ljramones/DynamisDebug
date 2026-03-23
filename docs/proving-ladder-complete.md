@@ -3,11 +3,34 @@
 **Date:** 2026-03-22
 **Status:** All 7 modules delivered and verified
 
+## System Identity
+
+DynamisDebug is not just debug tooling. It is an **engine observability platform**:
+
+- **Real-time telemetry** — DebugSession, 19 subsystem adapters
+- **Historical analysis** — history ring buffer, timeline, time-series extraction
+- **Policy enforcement** — watchdog rules with cooldowns, severity escalation
+- **Visual inspection** — structured overlay panels + world-space debug draw
+- **Analytical queries** — DebugAnalytics (spike detection, noise ranking, threshold analysis, correlation)
+
+This platform supports gameplay debugging, performance analysis, QA tooling, and live diagnostics.
+
 ## Overview
 
-DynamisDebug is the unified observability platform for the Dynamis engine. It spans diagnostic truth capture, time-series analysis, anomaly detection, world-space visualization, structured overlay rendering, and programmatic analytics — all without violating subsystem boundaries.
-
 The 7-module proving ladder validates every capability end-to-end through interactive demonstrations that serve as both regression guards and developer onboarding.
+
+## Why the Proving Ladder Exists
+
+Each module isolates and validates a single dimension of observability:
+
+- **overlay** — visibility
+- **history** — time
+- **correlation** — causality
+- **watchdog** — policy
+- **queries** — analysis
+- **capstone** — integration
+
+This ensures the system is understood, testable, and teachable.
 
 ## The 7 Modules
 
@@ -167,6 +190,61 @@ Missing this call causes "No context is current" fatal error on macOS.
 - **Remote dashboards** — DebugOverlayRenderer SPI supports headless/remote rendering
 - **Editor integration** — DebugAnalytics powers editor inspector panels
 - **Automated regression** — watchdog rules can drive CI pass/fail decisions
+
+## Not Yet (Explicitly Deferred)
+
+- **Full editor integration** — the overlay is runtime-only; editor panels are a separate concern
+- **Arbitrary query language / SQL-like system** — DebugAnalytics covers the proven patterns; generalization is premature
+- **Complex UI widgets or layout engine** — simple column-based layout is sufficient for Phase 1
+- **Networked multi-client debugging** — remote export is future; real-time multi-client is much later
+- **Automatic root-cause inference** — correlation is visual/manual; automated causal reasoning is research-grade
+- **Mouse/click interaction** — keyboard-only for now; pointer interaction adds UI framework complexity
+
+**Rationale:** Keep the system focused, composable, and proven incrementally. Every deferred item can be added later without architectural changes because the boundaries are clean.
+
+## Next Steps (Scoped)
+
+### 1. Focus / Drill-Down Mode
+
+Expand selected panel to fullscreen showing:
+- Full metric list (no truncation)
+- Enlarged trends (full-width sparklines)
+- Last N events for that category
+- Keyboard navigation between panels (arrow keys or number keys)
+
+**Non-goals:** No mouse interaction. No nested UI hierarchy. No mini-editor.
+
+### 2. Replay Integration (Time Navigation)
+
+- Freeze DebugSession at a selected historical frame
+- Switch DebugViewSnapshotMapper to read from historical frame instead of live
+- Add time cursor (frame index or timestamp)
+- Allow stepping forward/backward through history
+
+**Non-goals:** No full game-state rewind. No input replay. No deterministic re-simulation.
+
+### 3. Vulkan Renderer Parity
+
+Implement DebugOverlayRenderer SPI for Vulkan backend. The SPI contract already exists; this is a rendering-only task.
+
+### 4. Remote Telemetry / Headless Export
+
+DebugViewSnapshot is a serializable record. Export it for external dashboards or headless CI analysis.
+
+## Production API Surface
+
+`DebugAnalytics` is a production-grade query layer intended for reuse beyond proving modules:
+
+- `findSpikes()` — threshold exceedance detection with max value and last spike frame
+- `rankNoisyRules()` — watchdog fire-count ranking for rule quality assessment
+- `analyzeThresholdCrossings()` — transition counting with first/last crossing and duration above
+- `findCorrelatedFrames()` — multi-condition co-occurrence detection across subsystems
+
+This API is suitable for runtime diagnostics, editor tooling, and automated test assertions.
+
+## Architectural Note
+
+`DebugViewSnapshotMapper` currently lives in `DynamisUI/ui-debug` for convenience (it depends downward on DynamisDebug, which is valid). Long-term it may move to a dedicated `debug-ui-bridge` module in DynamisDebug to keep the truth-production pipeline closer to its source.
 
 ## Test Coverage
 
