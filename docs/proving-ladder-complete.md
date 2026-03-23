@@ -32,6 +32,14 @@ Each module isolates and validates a single dimension of observability:
 
 This ensures the system is understood, testable, and teachable.
 
+## Design Principles
+
+1. **Separation of Concerns** — Debug produces truth, UI presents it, proving demonstrates usage
+2. **Observability over Visualization** — The system must answer questions, not just display data
+3. **Incremental Proof** — Every capability is proven in isolation before integration
+4. **Deterministic Behavior** — Queries, history, and alerts must be reproducible and testable
+5. **Bounded Complexity** — Features are added with explicit non-goals to prevent overgrowth
+
 ## The 7 Modules
 
 | # | Module | What it proves | Key takeaway |
