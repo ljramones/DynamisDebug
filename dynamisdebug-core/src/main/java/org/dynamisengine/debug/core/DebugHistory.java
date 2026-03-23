@@ -36,5 +36,28 @@ public final class DebugHistory {
 
     public int size() { return frames.size(); }
 
+    /** Find a frame by number. Returns empty if not retained. */
+    public Optional<FrameRecord> frame(long frameNumber) {
+        for (var f : frames) {
+            if (f.frameNumber() == frameNumber) return Optional.of(f);
+        }
+        return Optional.empty();
+    }
+
+    /** Oldest retained frame, or empty if history is empty. */
+    public Optional<FrameRecord> oldest() {
+        return frames.isEmpty() ? Optional.empty() : Optional.of(frames.getFirst());
+    }
+
+    /** Newest retained frame number, or -1 if empty. */
+    public long newestFrameNumber() {
+        return frames.isEmpty() ? -1 : frames.getLast().frameNumber();
+    }
+
+    /** Oldest retained frame number, or -1 if empty. */
+    public long oldestFrameNumber() {
+        return frames.isEmpty() ? -1 : frames.getFirst().frameNumber();
+    }
+
     public record FrameRecord(long frameNumber, Map<String, DebugSnapshot> snapshots) {}
 }
