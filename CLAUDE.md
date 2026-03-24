@@ -23,6 +23,7 @@ dynamisdebug-bridge   Adapters + integration: TelemetryAdapter<T>, DebugBridge (
 
 ## Doctrine
 
+- **DynamisDebug is the sole authority for engine observability truth and diagnostic policy** (registered in `docs/architecture/subsystem-authority.md`).
 - **The debug spine is a first-class engine subsystem.**
 - **All runtime telemetry enters DynamisDebug through bridge adapters only.**
 - **Subsystems remain debug-agnostic producers of public state.**
