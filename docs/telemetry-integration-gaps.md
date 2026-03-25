@@ -85,23 +85,15 @@ module name mismatch (mvel3 -> org.mvel3).
 
 ---
 
-### 8. Threading / Job System (OPPORTUNITY)
+### 8. Threading / Job System — DONE ✓
 
-**Current:** No threading telemetry.
-
-**Missing:**
-- Thread utilization per frame
-- Job queue depth and completion time
-- Contention / lock wait time
-- Work stealing events
-
-**What integration should produce:**
-- Metrics: `thread.utilization`, `thread.queueDepth`, `thread.contentionMs`
-- Events: `thread.starvation`, `thread.contention`
-
-**Implementation path:**
-- Requires instrumentation in the job scheduler (if one exists)
-- New `ThreadTelemetryAdapter`
+Completed 2026-03-25. No central job system exists — engine uses distributed
+executor pools. New ThreadingTelemetryAdapter aggregates across: event bus
+dispatch pool (BusMetrics), AI cognition virtual thread executor (queue depth,
+completed, timeouts), AI navigation executor, GPU upload pool. AI
+DefaultCognitionService enriched with completedCount/timeoutCount AtomicLong
+counters. 3 new watchdog rules: cognitionQueueBacklog (>8), gpuUploadBacklog
+(>5), eventBusDeadLetters (>10).
 
 ---
 

@@ -35,6 +35,11 @@ public final class SimulationWatchdogRules {
                 scriptingErrorBurst(),
                 scriptingCacheMissHigh(),
 
+                // --- Threading ---
+                threadingCognitionQueueBacklog(),
+                threadingGpuUploadBacklog(),
+                threadingEventBusDeadLetters(),
+
                 // --- AI ---
                 aiBudgetExceeded(),
                 aiDegradeSpike(),
@@ -104,6 +109,26 @@ public final class SimulationWatchdogRules {
     public static WatchdogRule scriptingCacheMissHigh() {
         return WatchdogRule.above("scripting.cacheMissHigh", "scripting", "dsl.cacheMisses",
                 10.0, DebugSeverity.WARNING, "DSL cache miss rate high");
+    }
+
+    // --- Threading rules ---
+
+    /** AI cognition inference queue backing up. */
+    public static WatchdogRule threadingCognitionQueueBacklog() {
+        return WatchdogRule.above("threading.cognitionQueueBacklog", "threading", "threading.cognition.queueDepth",
+                8.0, DebugSeverity.WARNING, "AI cognition queue depth high");
+    }
+
+    /** GPU upload backlog — mesh uploads not keeping up. */
+    public static WatchdogRule threadingGpuUploadBacklog() {
+        return WatchdogRule.above("threading.gpuUploadBacklog", "threading", "threading.gpuUpload.backlog",
+                5.0, DebugSeverity.WARNING, "GPU upload backlog growing");
+    }
+
+    /** Event bus dead letters — events with no listeners. */
+    public static WatchdogRule threadingEventBusDeadLetters() {
+        return WatchdogRule.above("threading.eventBusDeadLetters", "threading", "threading.eventBus.deadLetters",
+                10.0, DebugSeverity.WARNING, "Event bus dead letters accumulating");
     }
 
     // --- AI rules ---
