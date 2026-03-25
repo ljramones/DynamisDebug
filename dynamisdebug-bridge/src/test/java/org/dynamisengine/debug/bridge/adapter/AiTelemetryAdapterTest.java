@@ -81,4 +81,37 @@ class AiTelemetryAdapterTest {
         assertFalse(adapter.adapt(low, 1).flags().get("inferenceQueuePressure"));
         assertTrue(adapter.adapt(high, 1).flags().get("inferenceQueuePressure"));
     }
+
+    @Test
+    void executionTimingMetrics() {
+        var snapshot = new AiTelemetrySnapshot(
+                new SimulationTelemetry(20, 3.5, 20, 1, 5),
+                new CognitionTelemetry(2, 100, 0, 1.2, 50.0, 10, 5, 20, 0),
+                new PlanningTelemetry(15, 2, 14, 1, 0),
+                new BudgetTelemetry(65.0, 15, 0, 0, 10, 5, 3, 2),
+                new ExecutionTelemetry(6.5, 2.1, "perception-agent-7", 8, 42, 1));
+
+        var debug = adapter.adapt(snapshot, 1);
+        assertEquals(6.5, debug.metrics().get("execution.frameTotalMs"));
+        assertEquals(2.1, debug.metrics().get("execution.hottestTaskMs"));
+        assertEquals(8.0, debug.metrics().get("execution.taskCount"));
+        assertEquals(42.0, debug.metrics().get("execution.completedInferences"));
+        assertEquals(1.0, debug.metrics().get("execution.timeoutInferences"));
+        assertFalse(debug.flags().get("frameOverBudget"));
+        assertFalse(debug.flags().get("timeoutBurst"));
+    }
+
+    @Test
+    void executionOverBudgetFlags() {
+        var snapshot = new AiTelemetrySnapshot(
+                new SimulationTelemetry(50, 12.0, 50, 1, 10),
+                new CognitionTelemetry(2, 100, 0, 1.2, 50.0, 10, 5, 20, 0),
+                new PlanningTelemetry(15, 2, 14, 1, 0),
+                new BudgetTelemetry(120.0, 40, 10, 5, 15, 10, 10, 5),
+                new ExecutionTelemetry(12.0, 5.0, "planning-agent-3", 15, 80, 5));
+
+        var debug = adapter.adapt(snapshot, 1);
+        assertTrue(debug.flags().get("frameOverBudget"));
+        assertTrue(debug.flags().get("timeoutBurst"));
+    }
 }

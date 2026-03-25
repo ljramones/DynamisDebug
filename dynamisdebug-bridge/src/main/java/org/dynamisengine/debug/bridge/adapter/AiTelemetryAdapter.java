@@ -41,14 +41,19 @@ public final class AiTelemetryAdapter implements TelemetryAdapter<AiTelemetryAda
         flags.put("budgetExceeded", t.budget().budgetUsedPercent() > 100.0);
         flags.put("planningThrashing", t.planning().replanCount() > t.planning().planCount());
         flags.put("perceptStaleness", t.cognition().stalePerceptLoad() > 0);
+        flags.put("frameOverBudget", t.execution().frameTotalMs() > 8.0);
+        flags.put("timeoutBurst", t.execution().timeoutInferences() > 3);
 
+        String hottestInfo = t.execution().hottestTaskId().isEmpty()
+                ? "" : " hottest=" + t.execution().hottestTaskId();
         String text = String.format(java.util.Locale.ROOT,
-                "agents=%d tick=%.1fms budget=%.0f%% | inference: queue=%d calls=%d fails=%d | " +
+                "agents=%d frame=%.1fms (tick=%.1fms) budget=%.0f%%%s | " +
+                "inference: queue=%d done=%d timeout=%d | " +
                 "plans=%d replans=%d | LOD: 0=%d 1=%d 2=%d skip=%d",
-                t.simulation().agentCount(), t.simulation().tickElapsedMs(),
-                t.budget().budgetUsedPercent(),
-                t.cognition().inferenceQueueDepth(), t.cognition().totalInferenceCalls(),
-                t.cognition().failedInferenceCalls(),
+                t.simulation().agentCount(), t.execution().frameTotalMs(),
+                t.simulation().tickElapsedMs(), t.budget().budgetUsedPercent(), hottestInfo,
+                t.cognition().inferenceQueueDepth(), t.execution().completedInferences(),
+                t.execution().timeoutInferences(),
                 t.planning().planCount(), t.planning().replanCount(),
                 t.budget().realtimeAgents(), t.budget().highQAgents(),
                 t.budget().cachedAgents(), t.budget().skippedTaskCount());
@@ -96,6 +101,13 @@ public final class AiTelemetryAdapter implements TelemetryAdapter<AiTelemetryAda
         metrics.put("budget.cachedAgents", (double) t.budget().cachedAgents());
         metrics.put("budget.skippedAgents", (double) t.budget().skippedAgents());
 
+        // Execution timing plane (from FrameBudgetReport)
+        metrics.put("execution.frameTotalMs", t.execution().frameTotalMs());
+        metrics.put("execution.hottestTaskMs", t.execution().hottestTaskMs());
+        metrics.put("execution.taskCount", (double) t.execution().taskCount());
+        metrics.put("execution.completedInferences", (double) t.execution().completedInferences());
+        metrics.put("execution.timeoutInferences", (double) t.execution().timeoutInferences());
+
         return metrics;
     }
 
@@ -129,13 +141,32 @@ public final class AiTelemetryAdapter implements TelemetryAdapter<AiTelemetryAda
             int cachedAgents, int skippedAgents
     ) {}
 
+    /** Per-task execution timing from BudgetGovernor FrameBudgetReport. */
+    public record ExecutionTelemetry(
+            double frameTotalMs,
+            double hottestTaskMs,
+            String hottestTaskId,
+            int taskCount,
+            long completedInferences,
+            long timeoutInferences
+    ) {}
+
     /**
-     * Complete AI telemetry snapshot across all four planes.
+     * Complete AI telemetry snapshot across all four planes plus execution timing.
      */
     public record AiTelemetrySnapshot(
             SimulationTelemetry simulation,
             CognitionTelemetry cognition,
             PlanningTelemetry planning,
-            BudgetTelemetry budget
-    ) {}
+            BudgetTelemetry budget,
+            ExecutionTelemetry execution
+    ) {
+        /** Backwards-compatible constructor without execution telemetry. */
+        public AiTelemetrySnapshot(
+                SimulationTelemetry simulation, CognitionTelemetry cognition,
+                PlanningTelemetry planning, BudgetTelemetry budget) {
+            this(simulation, cognition, planning, budget,
+                    new ExecutionTelemetry(0, 0, "", 0, 0, 0));
+        }
+    }
 }

@@ -66,22 +66,13 @@ module name mismatch (mvel3 -> org.mvel3).
 
 ---
 
-### 7. AI Decision Timing (MEDIUM)
+### 7. AI Decision Timing — DONE ✓
 
-**Current:** 4 planes (simulation, cognition, planning, budget/LOD).
-
-**Missing:**
-- Per-agent planning time
-- Perception update cost
-- Navigation pathfinding cost
-- Behavior tree tick time distribution
-
-**What integration should produce:**
-- Metrics: `ai.planningMs`, `ai.perceptionMs`, `ai.navMs`, `ai.agentsOverBudget`
-- Events: `ai.planningTimeout`, `ai.perceptionStale`
-
-**Implementation path:**
-- `AiTelemetryAdapter` exists with 4 planes; enrich with timing data
+Completed 2026-03-25. Extended AiTelemetryAdapter with 5th ExecutionTelemetry
+plane: frameTotalMs, hottestTaskMs, hottestTaskId, taskCount, completedInferences,
+timeoutInferences. Data sourced from FrameBudgetReport per-task TaskExecutionRecords
+and DefaultCognitionService counters. New flags: frameOverBudget (>8ms),
+timeoutBurst (>3). 2 new watchdog rules: aiFrameOverBudget, aiTimeoutBurst.
 
 ---
 

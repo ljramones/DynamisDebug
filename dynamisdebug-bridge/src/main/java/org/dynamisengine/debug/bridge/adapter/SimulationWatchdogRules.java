@@ -45,7 +45,9 @@ public final class SimulationWatchdogRules {
                 aiDegradeSpike(),
                 aiInferenceBacklog(),
                 aiReplanThrashing(),
-                aiPerceptStaleness()
+                aiPerceptStaleness(),
+                aiFrameOverBudget(),
+                aiTimeoutBurst()
         );
     }
 
@@ -161,5 +163,17 @@ public final class SimulationWatchdogRules {
     public static WatchdogRule aiPerceptStaleness() {
         return WatchdogRule.above("ai.perceptStaleness", "ai", "cognition.stalePerceptLoad",
                 10.0, DebugSeverity.WARNING, "AI perception running stale");
+    }
+
+    /** AI frame total exceeds budget (8ms default). */
+    public static WatchdogRule aiFrameOverBudget() {
+        return WatchdogRule.above("ai.frameOverBudget", "ai", "execution.frameTotalMs",
+                8.0, DebugSeverity.WARNING, "AI frame exceeds 8ms budget");
+    }
+
+    /** AI inference timeouts spiking. */
+    public static WatchdogRule aiTimeoutBurst() {
+        return WatchdogRule.above("ai.timeoutBurst", "ai", "execution.timeoutInferences",
+                3.0, DebugSeverity.WARNING, "AI inference timeouts spiking");
     }
 }

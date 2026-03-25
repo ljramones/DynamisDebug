@@ -11,7 +11,7 @@ class SimulationWatchdogRulesTest {
     @Test
     void allRulesPresent() {
         var rules = SimulationWatchdogRules.all();
-        assertEquals(18, rules.size());
+        assertEquals(20, rules.size());
     }
 
     @Test
