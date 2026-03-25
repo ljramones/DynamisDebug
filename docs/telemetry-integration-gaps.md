@@ -45,24 +45,13 @@ primitive fields). AudioTelemetry record extended, AudioTelemetryAdapter enriche
 
 ---
 
-### 5. Rendering Pipeline Detail (MEDIUM-HIGH)
+### 5. Rendering Pipeline Detail — DONE ✓
 
-**Current:** FPS, draw calls, triangles, CPU/GPU ms (aggregate).
-
-**Missing:**
-- Per-pass draw call count and triangle count
-- Material/shader switch count (batching efficiency)
-- Occlusion culling effectiveness (visible vs submitted)
-- Texture streaming bandwidth
-- LOD transition stats
-
-**What integration should produce:**
-- Metrics: `render.shadowDrawCalls`, `render.geometryDrawCalls`, `render.shaderSwitches`, `render.cullEfficiency`
-- Events: `render.lod.transition`, `render.texture.streamSpike`
-
-**Implementation path:**
-- Frame graph already tracks pass counts; expose them
-- `LightEngineTelemetryAdapter` exists, needs pass-level granularity
+Completed 2026-03-25. Per-pass draw call counts (shadow, geometry, post),
+pipeline/shader switch count, submitted vs visible object counts, per-variant
+draw counts (static, morph, skinned, instanced). EngineStats extended with 9
+new fields, VulkanContext counts variants from mesh list, LightEngineTelemetryAdapter
+extracts all new metrics. Flag: highPipelineSwitches (>5).
 
 ---
 

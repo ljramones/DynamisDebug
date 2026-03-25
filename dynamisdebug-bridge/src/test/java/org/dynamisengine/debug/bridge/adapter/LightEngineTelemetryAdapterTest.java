@@ -17,7 +17,8 @@ class LightEngineTelemetryAdapterTest {
 
     @Test
     void adaptFullStats() {
-        var stats = new EngineStats(60, 8.5f, 12.3f, 500, 150000, 200, 512_000_000, 0.05f, 0.85f, 2);
+        var stats = new EngineStats(60, 8.5f, 12.3f, 500, 150000, 200, 512_000_000, 0.05f, 0.85f, 2,
+                100, 400, 1, 3, 500, 350, 20, 80, 50);
         var debug = adapter.adapt(stats, 1);
 
         assertEquals(60.0, debug.metrics().get("fps"));
@@ -33,14 +34,16 @@ class LightEngineTelemetryAdapterTest {
 
     @Test
     void cpuBoundDetected() {
-        var stats = new EngineStats(30, 20.0f, 5.0f, 100, 10000, 50, 0, 0, 0.9f, 0);
+        var stats = new EngineStats(30, 20.0f, 5.0f, 100, 10000, 50, 0, 0, 0.9f, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0);
         var debug = adapter.adapt(stats, 1);
         assertFalse(debug.flags().get("gpuBound"));
     }
 
     @Test
     void taaConfidenceLow() {
-        var stats = new EngineStats(60, 8.0f, 10.0f, 100, 10000, 50, 0, 0.1f, 0.3f, 5);
+        var stats = new EngineStats(60, 8.0f, 10.0f, 100, 10000, 50, 0, 0.1f, 0.3f, 5,
+                0, 0, 0, 0, 0, 0, 0, 0, 0);
         var debug = adapter.adapt(stats, 1);
         assertTrue(debug.flags().get("taaConfidenceLow"));
     }

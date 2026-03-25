@@ -30,13 +30,17 @@ public final class LightEngineTelemetryAdapter implements TelemetryAdapter<Engin
 
         Map<String, Boolean> flags = Map.of(
                 "gpuBound", stats.gpuFrameMs() > stats.cpuFrameMs(),
-                "taaConfidenceLow", stats.taaConfidenceMean() < 0.5f
+                "taaConfidenceLow", stats.taaConfidenceMean() < 0.5f,
+                "highPipelineSwitches", stats.pipelineSwitches() > 5
         );
 
         String text = String.format(java.util.Locale.ROOT,
-                "fps=%.0f draws=%d tris=%d visible=%d cpu=%.1fms gpu=%.1fms",
-                stats.fps(), stats.drawCalls(), stats.triangles(),
-                stats.visibleObjects(), stats.cpuFrameMs(), stats.gpuFrameMs());
+                "fps=%.0f draws=%d (shadow=%d geo=%d post=%d) switches=%d visible=%d/%d cpu=%.1fms gpu=%.1fms",
+                stats.fps(), stats.drawCalls(),
+                stats.shadowDrawCalls(), stats.geometryDrawCalls(), stats.postDrawCalls(),
+                stats.pipelineSwitches(),
+                stats.visibleObjects(), stats.submittedObjects(),
+                stats.cpuFrameMs(), stats.gpuFrameMs());
 
         return new DebugSnapshot(frameNumber, System.currentTimeMillis(),
                 subsystemName(), category(), metrics, flags, text);
@@ -55,6 +59,17 @@ public final class LightEngineTelemetryAdapter implements TelemetryAdapter<Engin
         metrics.put("taaHistoryRejectRate", (double) stats.taaHistoryRejectRate());
         metrics.put("taaConfidenceMean", (double) stats.taaConfidenceMean());
         metrics.put("taaConfidenceDropEvents", (double) stats.taaConfidenceDropEvents());
+        // Per-pass draw call breakdown
+        metrics.put("shadowDrawCalls", (double) stats.shadowDrawCalls());
+        metrics.put("geometryDrawCalls", (double) stats.geometryDrawCalls());
+        metrics.put("postDrawCalls", (double) stats.postDrawCalls());
+        metrics.put("pipelineSwitches", (double) stats.pipelineSwitches());
+        metrics.put("submittedObjects", (double) stats.submittedObjects());
+        // Per-variant draw counts
+        metrics.put("staticDraws", (double) stats.staticDraws());
+        metrics.put("morphDraws", (double) stats.morphDraws());
+        metrics.put("skinnedDraws", (double) stats.skinnedDraws());
+        metrics.put("instancedDraws", (double) stats.instancedDraws());
         return metrics;
     }
 }
