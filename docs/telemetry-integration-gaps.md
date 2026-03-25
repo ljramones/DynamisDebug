@@ -88,17 +88,13 @@ counters. 3 new watchdog rules: cognitionQueueBacklog (>8), gpuUploadBacklog
 
 ---
 
-### 9. Content / Asset Pipeline (LOW)
+### 9. Content / Asset Pipeline — DONE ✓
 
-**Current:** Cache hit/miss, failed resolutions.
-
-**Missing:**
-- Asset load time per type
-- Streaming bandwidth
-- Hot reload events
-
-**Implementation path:**
-- `ContentTelemetryAdapter` exists; enrich with timing
+Completed 2026-03-25. DefaultAssetCache: AtomicLong hit/miss counters with
+size()/cacheHits()/cacheMisses() accessors. DefaultAssetManager: totalLoads,
+failedLoads, lastLoadNanos, lastLoadedAssetId counters with timing around
+loader.load(). ContentTelemetryAdapter enriched with lastLoadMs, loadSlow flag
+(>50ms), cacheMissHigh flag. 2 new watchdog rules: loadFailures, cacheMissHigh.
 
 ---
 

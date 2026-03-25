@@ -35,6 +35,10 @@ public final class SimulationWatchdogRules {
                 scriptingErrorBurst(),
                 scriptingCacheMissHigh(),
 
+                // --- Content ---
+                contentLoadFailures(),
+                contentCacheMissHigh(),
+
                 // --- Threading ---
                 threadingCognitionQueueBacklog(),
                 threadingGpuUploadBacklog(),
@@ -111,6 +115,20 @@ public final class SimulationWatchdogRules {
     public static WatchdogRule scriptingCacheMissHigh() {
         return WatchdogRule.above("scripting.cacheMissHigh", "scripting", "dsl.cacheMisses",
                 10.0, DebugSeverity.WARNING, "DSL cache miss rate high");
+    }
+
+    // --- Content rules ---
+
+    /** Asset load failures accumulating. */
+    public static WatchdogRule contentLoadFailures() {
+        return WatchdogRule.above("content.loadFailures", "content", "failedResolutions",
+                3.0, DebugSeverity.WARNING, "Asset load failures accumulating");
+    }
+
+    /** Cache miss rate too high — excessive reloading. */
+    public static WatchdogRule contentCacheMissHigh() {
+        return WatchdogRule.above("content.cacheMissHigh", "content", "cacheMisses",
+                20.0, DebugSeverity.WARNING, "Content cache miss rate high");
     }
 
     // --- Threading rules ---
