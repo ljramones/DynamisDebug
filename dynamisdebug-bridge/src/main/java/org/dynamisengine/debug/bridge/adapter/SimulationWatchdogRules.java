@@ -31,6 +31,9 @@ public final class SimulationWatchdogRules {
                 chroniclerBacklogSpike(),
                 perceptStalenessHigh(),
                 degradationTier3Spike(),
+                scriptingFrameOverBudget(),
+                scriptingErrorBurst(),
+                scriptingCacheMissHigh(),
 
                 // --- AI ---
                 aiBudgetExceeded(),
@@ -83,6 +86,24 @@ public final class SimulationWatchdogRules {
     public static WatchdogRule degradationTier3Spike() {
         return WatchdogRule.above("degradation.tier3Spike", "scripting", "degradation.tier3Count",
                 5.0, DebugSeverity.ERROR, "Agents in must-not-act-wrong tier");
+    }
+
+    /** Scripting tick duration over budget. */
+    public static WatchdogRule scriptingFrameOverBudget() {
+        return WatchdogRule.above("scripting.frameOverBudget", "scripting", "canon.tickDurationMs",
+                4.0, DebugSeverity.WARNING, "Scripting tick over 4ms budget");
+    }
+
+    /** Evaluation errors spiking. */
+    public static WatchdogRule scriptingErrorBurst() {
+        return WatchdogRule.above("scripting.errorBurst", "scripting", "evaluation.errorCount",
+                3.0, DebugSeverity.WARNING, "Script evaluation errors spiking");
+    }
+
+    /** DSL cache miss rate too high — excessive recompilation. */
+    public static WatchdogRule scriptingCacheMissHigh() {
+        return WatchdogRule.above("scripting.cacheMissHigh", "scripting", "dsl.cacheMisses",
+                10.0, DebugSeverity.WARNING, "DSL cache miss rate high");
     }
 
     // --- AI rules ---

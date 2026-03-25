@@ -101,6 +101,30 @@ class ScriptingTelemetryAdapterTest {
         assertTrue(metrics.containsKey("degradation.tier0Count"));
         assertTrue(metrics.containsKey("degradation.maxLagTicks"));
         assertTrue(metrics.containsKey("dsl.cacheSize"));
+        assertTrue(metrics.containsKey("dsl.cacheHits"));
+        assertTrue(metrics.containsKey("dsl.cacheMisses"));
         assertTrue(metrics.containsKey("budget.remaining"));
+        assertTrue(metrics.containsKey("chronicler.executionMs"));
+        assertTrue(metrics.containsKey("evaluation.errorCount"));
+    }
+
+    @Test
+    void executionMetricsPopulated() {
+        var snapshot = new ScriptingTelemetrySnapshot(
+                new CanonTelemetry(5, 5, 2_000_000, 200, 42, 100),
+                new OracleTelemetry(10, 0, 3, 5, 0, 0),
+                new ChroniclerTelemetry(2, 1, 0, 5),
+                new PerceptTelemetry(50, 10, 0, 0, 0),
+                new DegradationTelemetry(10, 0, 0, 0, 0, 0.0),
+                50, 100,
+                1_500_000, 2, 45, 5);
+
+        var debug = adapter.adapt(snapshot, 1);
+        assertEquals(45.0, debug.metrics().get("dsl.cacheHits"));
+        assertEquals(5.0, debug.metrics().get("dsl.cacheMisses"));
+        assertEquals(2.0, debug.metrics().get("evaluation.errorCount"));
+        assertTrue(debug.flags().get("evaluationErrors"));
+        assertFalse(debug.flags().get("cacheMissHigh"));
+        assertTrue(debug.metrics().get("chronicler.executionMs") > 0);
     }
 }

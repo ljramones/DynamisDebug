@@ -55,23 +55,14 @@ extracts all new metrics. Flag: highPipelineSwitches (>5).
 
 ---
 
-### 6. Scripting Execution (MEDIUM)
+### 6. Scripting Execution — DONE ✓
 
-**Current:** Canon commits, oracle rejects, chronicler pending, percept staleness (5 planes).
-
-**Missing:**
-- Per-script execution time
-- Expression compilation cache stats (hit/miss rate)
-- Allocation pressure during script evaluation
-- Script error/exception counts
-
-**What integration should produce:**
-- Metrics: `scripting.evalMs`, `scripting.cacheHitRate`, `scripting.errorCount`
-- Events: `scripting.evalSlow`, `scripting.compileFail`
-
-**Implementation path:**
-- MVEL3 compiler already has timing; expose it
-- `ScriptingTelemetryAdapter` exists with 5 planes; add execution metrics
+Completed 2026-03-25. Per-phase timing (chronicler execution nanos), DSL cache
+hit/miss tracking (AtomicLong in DslCompiler), evaluation error counting
+(AtomicLong in TriggerEvaluator). RuntimeTickResult extended with 5 new fields.
+ScriptingTelemetryAdapter enriched with execution metrics. 3 new watchdog rules:
+frameOverBudget (>4ms), errorBurst (>3), cacheMissHigh (>10). Also fixed JPMS
+module name mismatch (mvel3 -> org.mvel3).
 
 ---
 

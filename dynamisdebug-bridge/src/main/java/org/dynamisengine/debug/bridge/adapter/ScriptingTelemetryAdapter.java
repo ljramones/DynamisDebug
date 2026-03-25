@@ -44,18 +44,24 @@ public final class ScriptingTelemetryAdapter implements TelemetryAdapter<Scripti
         flags.put("chroniclerBacklog", t.chronicler().pendingWorldEvents() > 10);
         flags.put("perceptStaleness", t.percept().stalePerceptCount() > 0);
         flags.put("tier3Active", t.degradation().tier3Count() > 0);
+        flags.put("evaluationErrors", t.evaluationErrors() > 0);
+        long totalCacheAccess = t.cacheHits() + t.cacheMisses();
+        flags.put("cacheMissHigh", totalCacheAccess > 0 && (double) t.cacheMisses() / totalCacheAccess > 0.5);
 
         double tickMs = t.canon().tickDurationNanos() / 1_000_000.0;
+        double chroniclerMs = t.chroniclerNanos() / 1_000_000.0;
         String text = String.format(java.util.Locale.ROOT,
-                "canon: proposed=%d committed=%d tick=%.2fms | oracle: validate=%d reject=%d | " +
-                "chronicler: pending=%d triggered=%d | percepts=%d stale=%d | " +
-                "tiers: 0=%d 1=%d 2=%d 3=%d",
-                t.canon().eventsProposed(), t.canon().eventsCommitted(), tickMs,
+                "canon: proposed=%d committed=%d tick=%.2fms chronicler=%.2fms | " +
+                "oracle: validate=%d reject=%d | chronicler: pending=%d triggered=%d | " +
+                "percepts=%d stale=%d | tiers: 0=%d 1=%d 2=%d 3=%d | " +
+                "cache: %d/%d errors=%d",
+                t.canon().eventsProposed(), t.canon().eventsCommitted(), tickMs, chroniclerMs,
                 t.oracle().validateCount(), t.oracle().validateFailures(),
                 t.chronicler().pendingWorldEvents(), t.chronicler().triggeredThisTick(),
                 t.percept().perceptsEmitted(), t.percept().stalePerceptCount(),
                 t.degradation().tier0Count(), t.degradation().tier1Count(),
-                t.degradation().tier2Count(), t.degradation().tier3Count());
+                t.degradation().tier2Count(), t.degradation().tier3Count(),
+                t.cacheHits(), t.cacheMisses(), t.evaluationErrors());
 
         return new DebugSnapshot(frameNumber, System.currentTimeMillis(),
                 subsystemName(), category(), metrics, flags, text);
@@ -104,7 +110,13 @@ public final class ScriptingTelemetryAdapter implements TelemetryAdapter<Scripti
 
         // DSL
         metrics.put("dsl.cacheSize", (double) t.dslCacheSize());
+        metrics.put("dsl.cacheHits", (double) t.cacheHits());
+        metrics.put("dsl.cacheMisses", (double) t.cacheMisses());
         metrics.put("budget.remaining", (double) t.budgetRemaining());
+
+        // Execution timing
+        metrics.put("chronicler.executionMs", t.chroniclerNanos() / 1_000_000.0);
+        metrics.put("evaluation.errorCount", (double) t.evaluationErrors());
 
         return metrics;
     }
@@ -153,6 +165,19 @@ public final class ScriptingTelemetryAdapter implements TelemetryAdapter<Scripti
             PerceptTelemetry percept,
             DegradationTelemetry degradation,
             int dslCacheSize,
-            long budgetRemaining
-    ) {}
+            long budgetRemaining,
+            long chroniclerNanos,
+            long evaluationErrors,
+            long cacheHits,
+            long cacheMisses
+    ) {
+        /** Backwards-compatible constructor for existing callers. */
+        public ScriptingTelemetrySnapshot(
+                CanonTelemetry canon, OracleTelemetry oracle,
+                ChroniclerTelemetry chronicler, PerceptTelemetry percept,
+                DegradationTelemetry degradation, int dslCacheSize, long budgetRemaining) {
+            this(canon, oracle, chronicler, percept, degradation, dslCacheSize, budgetRemaining,
+                    0, 0, 0, 0);
+        }
+    }
 }
