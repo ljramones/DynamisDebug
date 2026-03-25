@@ -13,95 +13,35 @@ metrics (entity counts, health flags) rather than deep diagnostic signals
 
 ## Priority-Ordered Integration Gaps
 
-### 1. GPU Timing (CRITICAL)
+### 1. GPU Timing — DONE ✓
 
-**Current:** CPU-side frame time only. No GPU timing queries.
-
-**Missing:**
-- Per-pass GPU timing (shadow, geometry, fog, smoke, post-process)
-- GPU frame total vs CPU frame (identifies GPU-bound vs CPU-bound)
-- Pipeline stall / sync point detection
-- Upload bandwidth and resource churn per frame
-- Shader compilation / cache miss events
-
-**What integration should produce:**
-- Metrics: `gpu.shadowMs`, `gpu.geometryMs`, `gpu.postMs`, `gpu.totalMs`, `gpu.uploadBytes`
-- Events: `gpu.frameBudgetExceeded`, `gpu.syncStall`, `gpu.shaderCacheMiss`
-- Watchdog rules: `gpu.totalMs > 12ms`, `gpu.uploadBytes > 10MB`
-
-**Implementation path:**
-- Vulkan: `vkCmdWriteTimestamp` before/after each render pass
-- OpenGL: `glQueryCounter` with `GL_TIMESTAMP`
-- Read back results with 1-frame latency (query pool double-buffer)
-
-**Adapter:** `GpuTelemetryAdapter` exists but needs per-pass timing data
+Completed 2026-03-25. Vulkan double-buffered timestamp queries (N+1 readback),
+per-pass timing (shadow/geometry/post/ui), `GpuTimingTelemetryAdapter` →
+DebugSnapshot → overlay/replay/compare. See `docs/gpu-timing-integration-spec.md`.
 
 ---
 
-### 2. ECS System Timing (HIGH)
+### 2. ECS System Timing — DONE ✓
 
-**Current:** Entity count, churn (create/destroy). No per-system execution time.
-
-**Missing:**
-- Per-system execution time per tick
-- Hot system identification (which system dominates the frame)
-- Component distribution / archetype stats
-- Query cost breakdown
-- Entity churn rate (creates + destroys per second)
-
-**What integration should produce:**
-- Metrics: `ecs.system.<name>.ms`, `ecs.totalSystemMs`, `ecs.queryCount`, `ecs.archetypeCount`
-- Events: `ecs.systemSlow` (when a single system exceeds budget)
-- Watchdog rules: `ecs.totalSystemMs > 4ms`, `ecs.system.physics.ms > 2ms`
-
-**Implementation path:**
-- Add timing hooks around each system's `tick()` in the ECS executor
-- Expose via `EcsTelemetryAdapter` (already exists, needs enrichment)
+Completed 2026-03-25. nanoTime around each sub.tick() in SubsystemCoordinator,
+`EcsTimingTelemetryAdapter` → DebugSnapshot(source="ecs"), 3 watchdog rules
+(frameOverBudget WARNING/ERROR, systemDominance). See `docs/ecs-system-timing-plan.md`.
 
 ---
 
-### 3. Physics Subsystem Depth (HIGH)
+### 3. Physics Subsystem Depth — DONE ✓
 
-**Current:** Step time, contacts, bodies (shallow).
-
-**Missing:**
-- Broadphase vs narrowphase timing breakdown
-- Constraint solver iteration count and cost
-- Island count and sizes
-- Penetration depth / resolution stats
-- CCD event counts
-- Character controller state
-
-**What integration should produce:**
-- Metrics: `physics.broadphaseMs`, `physics.narrowphaseMs`, `physics.solverMs`, `physics.islands`, `physics.avgPenetration`
-- Events: `physics.constraintExplosion`, `physics.unstableTimestep`, `physics.ccdOverflow`
-- Watchdog rules: `physics.solverMs > 3ms`, `physics.avgPenetration > 0.1`
-
-**Implementation path:**
-- ODE4J and Jolt backends expose timing internally; need to surface it
-- `PhysicsTelemetryAdapter` exists but needs richer input data
+Completed 2026-03-25. Per-phase timing in both backends: ODE4J (broadPhaseNs,
+solverNs, integrationNs accumulated across substeps) and Jolt (solverMs,
+integrationMs). PhysicsStats fields populated, PhysicsTelemetryAdapter enriched.
 
 ---
 
-### 4. Audio DSP Pipeline (MEDIUM-HIGH)
+### 4. Audio DSP Pipeline — DONE ✓
 
-**Current:** Voice count, DSP budget percent, ring buffer stats, underruns.
-
-**Missing:**
-- Per-stage DSP timing (mix, spatialize, effects, master)
-- Voice allocation churn (voices started/stopped per frame)
-- Per-bus load breakdown
-- Spatialization cost per voice
-- Buffer latency trend
-
-**What integration should produce:**
-- Metrics: `audio.mixMs`, `audio.spatializeMs`, `audio.effectsMs`, `audio.voiceChurn`
-- Events: `audio.underrunRisk` (before actual underrun), `audio.voiceSteal`
-- Watchdog rules: `audio.totalDspMs > 4ms`, `audio.voiceChurn > 10/frame`
-
-**Implementation path:**
-- CoreAudio/ALSA backends already have internal timing
-- `AudioTelemetryAdapter` exists, needs DSP-stage breakdown
+Completed 2026-03-25. Per-stage nanoTime in SoftwareMixer.renderBlock() for
+3 stages: voiceRender, busProcess, deviceWrite. Zero-allocation (volatile
+primitive fields). AudioTelemetry record extended, AudioTelemetryAdapter enriched.
 
 ---
 

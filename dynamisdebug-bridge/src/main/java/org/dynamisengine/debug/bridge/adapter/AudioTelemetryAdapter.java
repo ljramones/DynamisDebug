@@ -77,6 +77,11 @@ public final class AudioTelemetryAdapter implements TelemetryAdapter<AudioTeleme
         // Event queue
         metrics.put("droppedEventCount", (double) telemetry.droppedEventCount());
 
+        // Per-stage DSP timing
+        metrics.put("voiceRenderNanos", (double) t.voiceRenderNanos());
+        metrics.put("busProcessNanos", (double) t.busProcessNanos());
+        metrics.put("deviceWriteNanos", (double) t.deviceWriteNanos());
+
         return metrics;
     }
 

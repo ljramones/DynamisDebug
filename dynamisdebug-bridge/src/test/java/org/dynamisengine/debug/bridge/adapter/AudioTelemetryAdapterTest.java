@@ -15,7 +15,7 @@ class AudioTelemetryAdapterTest {
                 "CoreAudio", "Built-in Output",
                 new org.dynamisengine.audio.api.device.AudioFormat(48000, 2, 256, false),
                 5.3f, 0, 10000, 5000, 800, 2000, 0.5f,
-                3, 4, 4, 2, 0, 0);
+                3, 4, 4, 2, 0, 0, 0L, 0L, 0L);
     }
 
     @Test
@@ -46,7 +46,7 @@ class AudioTelemetryAdapterTest {
                 "CoreAudio", "Built-in Output",
                 new org.dynamisengine.audio.api.device.AudioFormat(48000, 2, 256, false),
                 5.3f, 0, 10000, 5000, 800, 2000, 0.5f,
-                3, 4, 4, 2, 5, 0);
+                3, 4, 4, 2, 5, 0, 0L, 0L, 0L);
         var snapshot = new AudioTelemetryAdapter.AudioTelemetrySnapshot(
                 telemetry, 32, 10, 64, 0, 0, 0);
         var debug = adapter.adapt(snapshot, 1);
