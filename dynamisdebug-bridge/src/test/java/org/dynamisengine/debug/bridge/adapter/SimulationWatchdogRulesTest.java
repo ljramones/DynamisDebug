@@ -11,16 +11,41 @@ class SimulationWatchdogRulesTest {
     @Test
     void allRulesPresent() {
         var rules = SimulationWatchdogRules.all();
-        assertEquals(22, rules.size());
+        assertEquals(23, rules.size());
     }
 
     @Test
-    void physicsRules() {
-        var step = SimulationWatchdogRules.physicsStepTimeHigh();
-        assertEquals("physics", step.source());
-        assertEquals("stepTimeMs", step.metricName());
-        assertTrue(step.evaluate(20.0));
-        assertFalse(step.evaluate(10.0));
+    void gpuRulesHaveEscalation() {
+        var warning = SimulationWatchdogRules.gpuFrameOverBudgetWarning();
+        var error = SimulationWatchdogRules.gpuFrameOverBudgetError();
+        assertEquals(DebugSeverity.WARNING, warning.severity());
+        assertEquals(DebugSeverity.ERROR, error.severity());
+        assertTrue(warning.evaluate(10.0));
+        assertFalse(warning.evaluate(6.0));
+        assertTrue(error.evaluate(14.0));
+        assertFalse(error.evaluate(10.0));
+    }
+
+    @Test
+    void physicsRulesHaveEscalation() {
+        var warning = SimulationWatchdogRules.physicsStepWarning();
+        var error = SimulationWatchdogRules.physicsStepError();
+        assertEquals(DebugSeverity.WARNING, warning.severity());
+        assertEquals(DebugSeverity.ERROR, error.severity());
+        assertTrue(warning.evaluate(10.0));
+        assertFalse(warning.evaluate(6.0));
+        assertEquals(60, warning.cooldownFrames());
+        assertEquals(30, error.cooldownFrames());
+    }
+
+    @Test
+    void aiRulesHaveEscalation() {
+        var warning = SimulationWatchdogRules.aiFrameOverBudgetWarning();
+        var error = SimulationWatchdogRules.aiFrameOverBudgetError();
+        assertEquals(DebugSeverity.WARNING, warning.severity());
+        assertEquals(DebugSeverity.ERROR, error.severity());
+        assertEquals(60, warning.cooldownFrames());
+        assertEquals(30, error.cooldownFrames());
     }
 
     @Test
@@ -28,24 +53,18 @@ class SimulationWatchdogRulesTest {
         var rule = SimulationWatchdogRules.canonCommitStall();
         assertEquals("scripting", rule.source());
         assertEquals(WatchdogRule.Comparison.LESS_THAN, rule.comparison());
-        assertTrue(rule.evaluate(0.0)); // no commits = fires
-        assertFalse(rule.evaluate(3.0)); // commits = ok
-    }
-
-    @Test
-    void oracleRejectSpike() {
-        var rule = SimulationWatchdogRules.oracleRejectSpike();
-        assertEquals("scripting", rule.source());
-        assertTrue(rule.evaluate(10.0));
-        assertFalse(rule.evaluate(2.0));
+        assertTrue(rule.evaluate(0.0));
+        assertFalse(rule.evaluate(3.0));
+        assertEquals(120, rule.cooldownFrames()); // noisy rule gets longer cooldown
     }
 
     @Test
     void degradationTier3Spike() {
         var rule = SimulationWatchdogRules.degradationTier3Spike();
         assertEquals(DebugSeverity.ERROR, rule.severity());
-        assertTrue(rule.evaluate(10.0));
-        assertFalse(rule.evaluate(3.0));
+        assertTrue(rule.evaluate(5.0));
+        assertFalse(rule.evaluate(2.0));
+        assertEquals(30, rule.cooldownFrames()); // ERROR gets short cooldown
     }
 
     @Test
@@ -57,10 +76,14 @@ class SimulationWatchdogRulesTest {
     }
 
     @Test
-    void aiReplanThrashing() {
-        var rule = SimulationWatchdogRules.aiReplanThrashing();
-        assertTrue(rule.evaluate(25.0));
-        assertFalse(rule.evaluate(5.0));
+    void cooldownsTiered() {
+        // ERROR rules should have shorter cooldowns than WARNING rules
+        for (var rule : SimulationWatchdogRules.all()) {
+            if (rule.severity() == DebugSeverity.ERROR) {
+                assertTrue(rule.cooldownFrames() <= 30,
+                        rule.name() + " ERROR should have cooldown <= 30, got " + rule.cooldownFrames());
+            }
+        }
     }
 
     @Test
